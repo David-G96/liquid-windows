@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="shortcut icon" href="./" type="image/x-icon" />
+    <title>MP2</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+      /* Use Segoe UI-ish stack */
+      :root {
+        --accent: #0a84ff;
+        --glass-border: rgba(255, 255, 255, 0.25);
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        font-family: "Segoe UI", "Segoe UI Variable", system-ui, -apple-system,
+          "Helvetica Neue", Roboto, "Noto Sans", "Apple Color Emoji",
+          "Segoe UI Emoji", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* Liquid Glass Effects */
+      .liquid-glass {
+        background: rgba(255, 255, 255, 0.08);
+        -webkit-backdrop-filter: blur(40px) saturate(180%);
+        backdrop-filter: blur(40px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15),
+          inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+          inset 0 -1px 0 0 rgba(255, 255, 255, 0.05);
+      }
+
+      .liquid-glass-strong {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(60px) saturate(200%);
+        -webkit-backdrop-filter: blur(60px) saturate(200%);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        box-shadow: 0 12px 48px 0 rgba(0, 0, 0, 0.2),
+          inset 0 1px 1px 0 rgba(255, 255, 255, 0.3),
+          inset 0 -1px 1px 0 rgba(255, 255, 255, 0.1);
+      }
+
+      .liquid-glow {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .liquid-glow::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0.1) 0%,
+          transparent 70%
+        );
+        animation: liquid-float 15s ease-in-out infinite;
+        pointer-events: none;
+      }
+
+      @keyframes liquid-float {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+        }
+        33% {
+          transform: translate(30px, -30px) scale(1.1);
+        }
+        66% {
+          transform: translate(-20px, 20px) scale(0.9);
+        }
+      }
+
+      .icon-glow {
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .icon-glow:hover {
+        filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.5));
+        transform: translateY(-2px);
+      }
+
+      /* small visual touches */
+      .wallpaper-shape {
+        filter: blur(120px);
+        opacity: 0.9;
+      }
+
+      /* make pointer cursor for draggable titlebar */
+      .draggable {
+        cursor: grab;
+      }
+
+      .draggable:active {
+        cursor: grabbing;
+      }
+
+      /* Ensure the Start menu and taskbar items are above wallpaper shapes */
+      .ui-layer {
+        z-index: 50;
+      }
+
+      /* Smooth transitions */
+      * {
+        transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+    </style>
+  </head>
+
+  <body class="antialiased bg-gray-100">
+    <!-- Desktop / Wallpaper -->
+    <div
+      class="relative min-h-screen overflow-hidden"
+      style="
+        background-image: url('img/lq-dark.jpg');
+        background-size: 100% 100%;
+      "
+    >
+      <!-- Top Menu Bar -->
+      <div
+        class="fixed top-0 left-0 right-0 h-8 bg-black/30 backdrop-blur-xl border-b border-white/10 z-50 flex items-center px-4 text-white text-sm"
+      >
+        <!-- Left side - app menus -->
+        <div class="flex items-center gap-5">
+          <!-- logo -->
+          <button
+            title="logo"
+            class="hover:bg-white/10 px-2 py-0.5 rounded transition-colors"
+          >
+            <img src="./img/mango.svg" class="w-4 h-4" alt="mango-logo" />
+          </button>
+          <button
+            class="hover:bg-white/10 px-2 py-0.5 rounded transition-colors font-semibold"
+          >
+            Plasma
+          </button>
+          <button
+            class="hover:bg-white/10 px-2 py-0.5 rounded transition-colors"
+          >
+            File
+          </button>
+          <button
+            class="hover:bg-white/10 px-2 py-0.5 rounded transition-colors"
+          >
+            Edit
+          </button>
+          <button
+            class="hover:bg-white/10 px-2 py-0.5 rounded transition-colors"
+          >
+            View
+          </button>
+          <button
+            class="hover:bg-white/10 px-2 py-0.5 rounded transition-colors"
+          >
+            Go
+          </button>
+          <button
+            class="hover:bg-white/10 px-2 py-0.5 rounded transition-colors"
+          >
+            Window
+          </button>
+          <button
+            class="hover:bg-white/10 px-2 py-0.5 rounded transition-colors"
+          >
+            Help
+          </button>
+        </div>
+
+        <!-- Right side - System icons and clock -->
+        <div class="ml-auto flex items-center gap-4">
+          <!-- Battery -->
+          <button
+            title="battery"
+            class="hover:bg-white/10 p-1 rounded transition-colors"
+          >
+            <svg
+              class="w-5 h-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <rect
+                x="2"
+                y="7"
+                width="18"
+                height="10"
+                rx="2"
+                stroke-width="1.5"
+              />
+              <path
+                d="M20 10h1.5a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5H20"
+                stroke-width="1.5"
+              />
+              <rect
+                x="5"
+                y="9.5"
+                width="10"
+                height="5"
+                rx="1"
+                fill="currentColor"
+              />
+            </svg>
+          </button>
+          <!-- WiFi -->
+          <button
+            title="wifi"
+            class="hover:bg-white/10 p-1 rounded transition-colors"
+          >
+            <svg
+              class="w-5 h-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                d="M5 12.55a11 11 0 0 1 14.08 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+          <!-- Search -->
+          <button
+            title="search bar"
+            class="hover:bg-white/10 p-1 rounded transition-colors"
+          >
+            <svg
+              class="w-5 h-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <circle cx="11" cy="11" r="8" stroke-width="1.5" />
+              <path
+                d="m21 21-4.35-4.35"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+          <!-- Clock -->
+          <div id="topClock" class="text-xs font-medium px-2">
+            Fri Nov 14 10:45 AM
+          </div>
+        </div>
+      </div>
+
+      <!-- Desktop icons (left side) -->
+      <div class="absolute left-6 top-16 space-y-4 z-40">
+        <div
+          class="flex items-center gap-3 text-white/95 select-none group cursor-pointer"
+        >
+          <div
+            class="w-12 h-12 rounded-2xl liquid-glass-strong icon-glow flex items-center justify-center"
+          >
+            <img
+              src="./img/documents.svg"
+              class="w-8 h-8 text-white"
+              alt="documents logo"
+            />
+          </div>
+          <div class="text-sm font-semibold text-white drop-shadow-lg">
+            Documents
+          </div>
+        </div>
+
+        <div
+          class="flex items-center gap-3 text-white/95 select-none group cursor-pointer"
+        >
+          <div
+            class="w-12 h-12 rounded-2xl liquid-glass-strong icon-glow flex items-center justify-center"
+          >
+            <svg
+              class="w-7 h-7 text-white"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                d="M12 2v4M5 8v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"
+                stroke-width="1.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <div class="text-sm font-semibold text-white drop-shadow-lg">
+            This PC
+          </div>
+        </div>
+
+        <div
+          class="flex items-center gap-3 text-white/95 select-none group cursor-pointer"
+        >
+          <div
+            class="w-12 h-12 rounded-2xl liquid-glass-strong icon-glow flex items-center justify-center"
+          >
+            <svg
+              class="w-7 h-7 text-white"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V6h12z"
+                stroke-width="1.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <div class="text-sm font-semibold text-white drop-shadow-lg">
+            Recycle Bin
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating window (draggable) -->
+      <div
+        id="window"
+        class="absolute w-[680px] max-w-[90%] rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 shadow-2xl ui-layer"
+        style="top: 120px; left: 144px"
+      >
+        <!-- Title bar -->
+        <div
+          id="titlebar"
+          class="draggable flex items-center justify-between rounded-t-2xl px-4 py-3 border-b border-white/20 bg-white/20"
+        >
+          <div class="flex items-center gap-3">
+            <!-- app icon -->
+            <div
+              class="w-8 h-8 rounded-xl liquid-glass flex items-center justify-center"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <rect
+                  x="3"
+                  y="6"
+                  width="18"
+                  height="12"
+                  rx="2"
+                  stroke-width="1.2"
+                />
+              </svg>
+            </div>
+            <div class="font-semibold text-white drop-shadow-lg">
+              File Explorer
+            </div>
+          </div>
+
+          <!-- window controls -->
+          <div class="flex items-center gap-2">
+            <!-- minimize -->
+            <button
+              class="w-12 h-12 rounded-full flex items-center justify-center bg-white/10 hover:bg-green-400/80 transition-colors group backdrop-blur-md border border-white/60 shadow-2xl hover:scale-105"
+              aria-label="Minimize"
+            >
+              <svg class="w-10 h-10" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M4 8 h8"
+                  stroke="currentColor"
+                  stroke-width="1"
+                  stroke-linecap="round"
+                  class="text-white group-hover:text-white"
+                />
+              </svg>
+            </button>
+
+            <!-- maximize -->
+            <button
+              class="w-12 h-12 rounded-full flex items-center justify-center bg-white/10 hover:bg-yellow-400/80 transition-colors group backdrop-blur-md border border-white/60 shadow-2xl hover:scale-105"
+              aria-label="Maximize"
+            >
+              <svg class="w-6 h-6" viewBox="0 0 16 16" fill="none">
+                <rect
+                  x="4"
+                  y="4"
+                  width="8"
+                  height="8"
+                  stroke="currentColor"
+                  stroke-width="1"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="text-white/70 group-hover:text-white"
+                />
+              </svg>
+            </button>
+
+            <!-- close -->
+            <button
+              class="w-12 h-12 rounded-full flex items-center justify-center bg-white/10 hover:bg-red-400/80 transition-colors group backdrop-blur-md border border-white/60 shadow-2xl hover:scale-105"
+              aria-label="Close"
+            >
+              <svg class="w-8 h-8" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M5 5l6 6M11 5l-6 6"
+                  stroke="currentColor"
+                  stroke-width="1"
+                  stroke-linecap="round"
+                  class="text-white/70 group-hover:text-white"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="p-6 text-white">
+          <h3 class="text-lg font-semibold mb-4 drop-shadow-lg">Quick files</h3>
+          <div class="grid grid-cols-3 gap-4">
+            <div
+              class="p-4 liquid-glass rounded-2xl hover:bg-white/15 transition-all cursor-pointer"
+            >
+              <div class="text-sm font-semibold drop-shadow">notes.txt</div>
+              <div class="text-xs text-white/70 mt-1">Modified: Nov 10</div>
+            </div>
+            <div
+              class="p-4 liquid-glass rounded-2xl hover:bg-white/15 transition-all cursor-pointer"
+            >
+              <div class="text-sm font-semibold drop-shadow">project.zip</div>
+              <div class="text-xs text-white/70 mt-1">Modified: Nov 9</div>
+            </div>
+            <div
+              class="p-4 liquid-glass rounded-2xl hover:bg-white/15 transition-all cursor-pointer"
+            >
+              <div class="text-sm font-semibold drop-shadow">
+                screenshot.png
+              </div>
+              <div class="text-xs text-white/70 mt-1">Modified: Nov 8</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Taskbar (fixed, right side centered) -->
+      <div
+        class="fixed right-6 top-0 h-full flex items-center pointer-events-none ui-layer"
+      >
+        <div
+          class="flex flex-col items-center gap-6 px-3 py-4 rounded-3xl liquid-glass-strong liquid-glow pointer-events-auto"
+        >
+          <!-- Start Button -->
+          <button
+            title="start button"
+            id="startBtn"
+            aria-expanded="false"
+            class="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-md ring-0 focus:outline-none focus:ring-2 focus:ring-white/40 hover:bg-white/40 transition-colors"
+          >
+            <img
+              src="./img/curve.svg"
+              class="w-10 h-10 drop-shadow-lg"
+              alt="menu bar"
+            />
+          </button>
+
+          <!-- Centered icons -->
+          <div class="flex flex-col items-center gap-4">
+            <!-- Edge-like -->
+            <button
+              data-app="edge"
+              class="app-icon group w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center hover:bg-white/25 focus:outline-none transition-colors"
+              title="Browser"
+            >
+              <svg
+                class="w-6 h-6 text-white drop-shadow-lg group-hover:scale-105 transform transition-transform"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path d="M12 2a10 10 0 1 0 10 10" stroke-width="1.2" />
+              </svg>
+            </button>
+
+            <!-- Store-like -->
+            <button
+              data-app="store"
+              class="app-icon group w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center hover:bg-white/25 focus:outline-none transition-colors"
+              title="Store"
+            >
+              <svg
+                class="w-5 h-5 text-white drop-shadow-lg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <rect
+                  x="3"
+                  y="4"
+                  width="18"
+                  height="16"
+                  rx="2"
+                  stroke-width="1.2"
+                />
+              </svg>
+            </button>
+
+            <!-- File Explorer -->
+            <button
+              id="explorerBtn"
+              data-app="explorer"
+              class="app-icon group w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center hover:bg-white/25 focus:outline-none transition-colors"
+              title="File Explorer"
+            >
+              <svg
+                class="w-5 h-5 text-white drop-shadow-lg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path d="M3 6h5l2 3h11v9a1 1 0 0 1-1 1H3z" stroke-width="1.2" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Bottom: system tray / clock -->
+          <div
+            class="mt-4 pt-4 border-t border-white/20 text-white text-xs font-medium drop-shadow-lg text-center"
+          >
+            <div id="clock" class="writing-mode-vertical">10:45 AM</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Start menu (toggles) -->
+      <div
+        id="startMenu"
+        class="absolute bottom-[50%] translate-y-[50%] right-[88px] w-[360px] rounded-2xl bg-white/50 backdrop-blur-lg border border-white/20 shadow-2xl opacity-0 scale-95 transform-gpu transition-all duration-180 pointer-events-none ui-layer"
+      >
+        <div class="p-4">
+          <div class="mb-3 text-sm font-semibold text-gray-900">Pinned</div>
+          <div class="grid grid-cols-4 gap-3">
+            <!-- pinned apps -->
+            <div
+              class="p-3 rounded-lg bg-white/30 hover:bg-white/40 transition text-center"
+            >
+              <div
+                class="w-8 h-8 mx-auto mb-2 rounded-md bg-white/20 flex items-center justify-center"
+              >
+                A
+              </div>
+              <div class="text-xs text-gray-900">App 1</div>
+            </div>
+            <div
+              class="p-3 rounded-lg bg-white/30 hover:bg-white/40 transition text-center"
+            >
+              <div
+                class="w-8 h-8 mx-auto mb-2 rounded-md bg-white/20 flex items-center justify-center"
+              >
+                B
+              </div>
+              <div class="text-xs text-gray-900">App 2</div>
+            </div>
+            <div
+              class="p-3 rounded-lg bg-white/30 hover:bg-white/40 transition text-center"
+            >
+              <div
+                class="w-8 h-8 mx-auto mb-2 rounded-md bg-white/20 flex items-center justify-center"
+              >
+                C
+              </div>
+              <div class="text-xs text-gray-900">App 3</div>
+            </div>
+            <div
+              class="p-3 rounded-lg bg-white/30 hover:bg-white/40 transition text-center"
+            >
+              <div
+                class="w-8 h-8 mx-auto mb-2 rounded-md bg-white/20 flex items-center justify-center"
+              >
+                D
+              </div>
+              <div class="text-xs text-gray-900">App 4</div>
+            </div>
+          </div>
+
+          <hr class="my-3 border-white/20" />
+
+          <div class="text-sm text-gray-800">
+            <div class="mb-2">Recommended</div>
+            <div class="p-2 rounded-lg bg-white/20">
+              Recent file · notes.txt
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Small inline JS for UI interactions -->
+    <script>
+      // Start menu toggle
+      const startBtn = document.getElementById("startBtn");
+      const startMenu = document.getElementById("startMenu");
+
+      let startOpen = false;
+      function setStart(open) {
+        startOpen = open;
+        startBtn.setAttribute("aria-expanded", open ? "true" : "false");
+        if (open) {
+          startMenu.classList.remove(
+            "opacity-0",
+            "scale-95",
+            "pointer-events-none"
+          );
+          startMenu.classList.add(
+            "opacity-100",
+            "scale-100",
+            "pointer-events-auto"
+          );
+        } else {
+          startMenu.classList.add(
+            "opacity-0",
+            "scale-95",
+            "pointer-events-none"
+          );
+          startMenu.classList.remove(
+            "opacity-100",
+            "scale-100",
+            "pointer-events-auto"
+          );
+        }
+      }
+
+      startBtn.addEventListener("click", (e) => {
+        setStart(!startOpen);
+      });
+
+      // Close start menu if clicked outside
+      document.addEventListener("click", (e) => {
+        if (!startBtn.contains(e.target) && !startMenu.contains(e.target)) {
+          setStart(false);
+        }
+      });
+
+      // Explorer button opens / focuses floating window
+      const explorerBtn = document.getElementById("explorerBtn");
+      const win = document.getElementById("window");
+
+      explorerBtn.addEventListener("click", () => {
+        // bring window to view (simple visual)
+        win.classList.remove("hidden");
+        win.style.top = "120px";
+        win.style.left = "144px";
+        win.classList.add("ring-0");
+        // small pop animation
+        win.animate(
+          [{ transform: "translateY(-6px)" }, { transform: "translateY(0)" }],
+          { duration: 220, easing: "cubic-bezier(.2,.9,.3,1)" }
+        );
+      });
+
+      // Simple draggable window implementation (pointer events)
+      const titlebar = document.getElementById("titlebar");
+      let isDragging = false;
+      let dragOffset = { x: 0, y: 0 };
+
+      titlebar.addEventListener("pointerdown", (e) => {
+        isDragging = true;
+        titlebar.setPointerCapture(e.pointerId);
+        const rect = win.getBoundingClientRect();
+        dragOffset.x = e.clientX - rect.left;
+        dragOffset.y = e.clientY - rect.top;
+        titlebar.classList.add("select-none");
+      });
+
+      window.addEventListener("pointermove", (e) => {
+        if (!isDragging) return;
+        // constrain so the window doesn't go fully off-screen (account for top menu bar)
+        const maxLeft = window.innerWidth - win.offsetWidth - 20;
+        const maxTop = window.innerHeight - win.offsetHeight - 20;
+        const minTop = 40; // Account for top menu bar (32px + some padding)
+        let newLeft = e.clientX - dragOffset.x;
+        let newTop = e.clientY - dragOffset.y;
+        newLeft = Math.max(12, Math.min(newLeft, maxLeft));
+        newTop = Math.max(minTop, Math.min(newTop, maxTop));
+        win.style.left = newLeft + "px";
+        win.style.top = newTop + "px";
+      });
+
+      window.addEventListener("pointerup", (e) => {
+        isDragging = false;
+        try {
+          titlebar.releasePointerCapture(e.pointerId);
+        } catch {}
+      });
+
+      // Live clock
+      function updateClock() {
+        const el = document.getElementById("clock");
+        const topClockEl = document.getElementById("topClock");
+        const now = new Date();
+        const opts = { hour: "numeric", minute: "2-digit" };
+        el.textContent = now.toLocaleTimeString([], opts);
+
+        // Update top menu bar clock with date
+        const dateOpts = { weekday: "short", month: "short", day: "numeric" };
+        const dateStr = now.toLocaleDateString("en-US", dateOpts);
+        const timeStr = now.toLocaleTimeString([], opts);
+        topClockEl.textContent = `${dateStr}  ${timeStr}`;
+      }
+      updateClock();
+      setInterval(updateClock, 1000 * 30);
+
+      // Accessibility: toggle start menu with keyboard (Enter/Space)
+      startBtn.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          setStart(!startOpen);
+        }
+      });
+    </script>
+  </body>
+</html>
